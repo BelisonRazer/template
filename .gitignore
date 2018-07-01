@@ -1,3 +1,12 @@
+/node_modules/
+/dist/
+/.git/
+/app/css/
+/**/_backstage
+/**/package-lock.json
+/**/Thumbs.db
+/**/*.DS_Store
+
 # IDE and OS
 .idea
 .mc
