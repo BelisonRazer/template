@@ -1,16 +1,14 @@
 {
-  "name": "optimizedhtml",
-  "version": "4.0.0",
-  "description": "OptimizedHTML 4 - Start HTML Template",
+  "name": "template",
+  "version": "1.0.0",
+  "description": "template bootstrap4 sass",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "WebDesign Master",
-  "license": "ISC",
+  "scripts": {},
+  "author": "S. V. Chertkov",
+  "license": "SC",
   "devDependencies": {
     "browser-sync": "^2.24.5",
-    "gulp": "^3.9.1",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-autoprefixer": "^5.0.0",
     "gulp-clean-css": "^3.9.4",
     "gulp-concat": "^2.6.1",
@@ -20,5 +18,15 @@
     "gulp-sass": "^4.0.1",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8"
+  },
+  "dependencies": {
+    "bootstrap-sass": "^3.3.7",
+    "del": "^3.0.0",
+    "gulp-debug": "^4.0.0",
+    "gulp-if": "^2.0.2",
+    "gulp-ignore": "^2.0.2",
+    "gulp-newer": "^1.4.0",
+    "gulp-series": "^1.0.2",
+    "npm-check-updates": "^2.14.2"
   }
 }

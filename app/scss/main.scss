@@ -1,6 +1,8 @@
-@import "vars";
-@import "fonts";
-@import "libs";
+@import "app/blocks/header/styles/header.scss";
+@import "app/common/image-container/styles/image-container.scss";
+@import "vars.scss";
+@import "fonts.scss";
+@import "libs.scss";
 
 ::placeholder {
 	color: #666;

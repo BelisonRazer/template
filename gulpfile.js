@@ -9,7 +9,7 @@ var gulp          = require('gulp'),
 		cleancss      = require('gulp-clean-css'),
 		rename        = require('gulp-rename'),
 		autoprefixer  = require('gulp-autoprefixer'),
-		notify        = require("gulp-notify"),
+		notify        = require('gulp-notify'),
 		rsync         = require('gulp-rsync');
 
 		newer         = require('gulp-newer'); // filtered new file
@@ -19,42 +19,47 @@ var gulp          = require('gulp'),
 		gulpIf        = require('gulp-if');
 
 gulp.task('styles', function() {
-	return gulp.src('app/'+syntax+'/**/main.'+syntax+'')
+	return gulp.src('app/'+syntax+'/**/*.'+syntax+'')
 	.pipe(sass({ outputStyle: 'expanded' }).on("error", notify.onError()))
-	.pipe(rename({ suffix: '.min', prefix : '' }))
-	.pipe(autoprefixer(['last 15 versions']))
-	.pipe(cleancss( {level: { 1: { specialComments: 0 } } })) // Opt., comment out when debugging
+	//.pipe(rename({ suffix: '.min', prefix : '' }))
+	//.pipe(autoprefixer(['last 15 versions']))
+	//.pipe(cleancss( {level: { 1: { specialComments: 0 } } })) // Opt., comment out when debugging
 	.pipe(gulp.dest('app/public'))
-	// .pipe(browserSync.stream())
+	//.pipe(browserSync.stream())
 });
 
 gulp.task('clean', function () {
-	return del('public');
+	return del('app/public');
 });
 
 gulp.task('assets', function () {
-    return gulp.src('assets/**', {since: gulp.lastRun("assets")})
-        .pipe(newer('public'))
+    return gulp.src('app/assets/**/*.*', {since: gulp.lastRun("assets")})
+        .pipe(newer('app/public'))
         .pipe(debug({title: 'assets'}))
-        .pipe(gulp.dest('public'));
+        .pipe(gulp.dest('app/public'));
+});
+
+gulp.task('fonts', function () {
+    return gulp.src('app/fonts/**/*.*', {since: gulp.lastRun("fonts")})
+        .pipe(newer('app/public'))
+        .pipe(debug({title: 'fonts'}))
+        .pipe(gulp.dest('app/public/fonts'));
 });
 
 gulp.task('images', function () {
-	return gulp.src(['blocks/header/**/*.*', '!blocks/**/**/styles/*'], {since: gulp.lastRun("images")})
-		.pipe(ignore.exclude('./styles/**/*'))
-		.pipe(newer('public'))
+	return gulp.src(['app/blocks/header/**/*.*', '!app/blocks/**/**/styles/*'], {since: gulp.lastRun("images")})
+		// .pipe(ignore.exclude('./styles/**/*'))
+		.pipe(newer('app/public'))
 		.pipe(debug({title: 'header'}))
-		.pipe(gulp.dest('public/blocks/header'))
+		.pipe(gulp.dest('app/public/blocks/header'))
 });
 
 gulp.task('img', function () {
-	return gulp.src('img/**/*.*', {since: gulp.lastRun("img")})
-		.pipe(newer('public'))
+	return gulp.src('app/img/**/*.*', {since: gulp.lastRun("img")})
+		.pipe(newer('app/public'))
 		.pipe(debug({title: 'soft-img'}))
-		.pipe(gulp.dest('public/blocks/header'))
+		.pipe(gulp.dest('app/public/img'))
 });
-
-gulp.task('build', gulp.series('clean', gulp.parallel('styles', 'assets'), 'images', 'img'));
 
 //-------------- js, rsync --------------
 
@@ -65,64 +70,45 @@ gulp.task('js', function() {
 		])
 	.pipe(concat('scripts.min.js'))
 	// .pipe(uglify()) // Mifify js (opt.)
-	.pipe(gulp.dest('app/js'))
+	.pipe(gulp.dest('app/public/js'))
 	// .pipe(browserSync.reload({ stream: true }))
 });
 
-gulp.task('rsync', function() {
-	return gulp.src('app/**')
-	.pipe(rsync({
-		root: 'app/',
-		hostname: 'username@mysite.com',
-		destination: 'mysite/public_html/',
-		// include: ['*.htaccess'], // Includes files to deploy
-		exclude: ['**/Thumbs.db', '**/*.DS_Store'], // Excludes files from deploy
-		recursive: true,
-		archive: true,
-		silent: false,
-		compress: true
-	}))
-});
+// gulp.task('rsync', function() {
+// 	return gulp.src('app/**')
+// 	.pipe(rsync({
+// 		root: 'app/',
+// 		hostname: 'username@mysite.com',
+// 		destination: 'mysite/public_html/',
+// 		// include: ['*.htaccess'], // Includes files to deploy
+// 		exclude: ['**/Thumbs.db', '**/*.DS_Store'], // Excludes files from deploy
+// 		recursive: true,
+// 		archive: true,
+// 		silent: false,
+// 		compress: true
+// 	}))
+// });
+
+gulp.task('build', gulp.series('clean', gulp.parallel('styles', 'assets'), 'fonts', 'js', 'images', 'img'));
 
 //-------------- watch, sync --------------
 
 gulp.task('watch', function () {
-	gulp.watch('sass/**/*.*', gulp.series('styles'));
-	gulp.watch('**/styles/*.*', gulp.series('styles'));
-	gulp.watch('**/**/styles/*.*', gulp.series('styles'));
-	gulp.watch('assets/**/*.*', gulp.series('assets'));
-	gulp.watch('img/**/*.*', gulp.series('img'));
-	gulp.watch('**/images/**/*.*', gulp.series('images'));
-	gulp.watch('**/**/images/**/*.*', gulp.series('images'));
-	gulp.watch('**/**/**/images/**/*.*', gulp.series('images'));
+	gulp.watch('app/sass/**/*.*', gulp.series('styles'));
+	gulp.watch('app/**/styles/*.*', gulp.series('styles'));
+	gulp.watch('app/**/**/styles/*.*', gulp.series('styles'));
+	gulp.watch('app/assets/**/*.*', gulp.series('assets'));
+	gulp.watch('app/fonts/**/*.*', gulp.series('fonts', 'styles'));
+	gulp.watch('app/img/**/*.*', gulp.series('img'));
+	gulp.watch('app/**/images/**/*.*', gulp.series('images'));
+	gulp.watch('app/**/**/images/**/*.*', gulp.series('images'));
+	gulp.watch('app/**/**/**/images/**/*.*', gulp.series('images'));
 });
 
 gulp.task('serve', function () {
-	browserSync.init({server: 'public'})
+	browserSync.init({server: 'app/public'})
 });
 
 gulp.task('dev', gulp.series('build', gulp.parallel('watch', 'serve')));
 
-browserSync.watch('public/**/*.*').on('change', browserSync.reload);
-
-//------------- other -------------
-
-// gulp.task('browser-sync', function() {
-// 	browserSync({
-// 		server: {
-// 			baseDir: 'app'
-// 		},
-// 		notify: false,
-// 		// open: false,
-// 		// online: false, // Work Offline Without Internet Connection
-// 		// tunnel: true, tunnel: "projectname", // Demonstration page: http://projectname.localtunnel.me
-// 	})
-// });
-
-// gulp.task('watch', ['styles', 'js', 'browser-sync'], function() {
-// 	gulp.watch('app/'+syntax+'/**/*.'+syntax+'', ['styles']);
-// 	gulp.watch(['libs/**/*.js', 'app/js/common.js'], ['js']);
-// 	gulp.watch('app/*.html', browserSync.reload)
-// });
-
-// gulp.task('default', ['watch']);
+browserSync.watch('app/public/**/*.*').on('change', browserSync.reload);
